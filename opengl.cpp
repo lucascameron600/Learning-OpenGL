@@ -43,6 +43,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     //error handling for window
 
+    //verticies of our traingle in 3d space normalized cords
     GLfloat verticies[] =
     {
         -0.75f, -0.75f,0.0f,
