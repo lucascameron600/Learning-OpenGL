@@ -74,12 +74,10 @@ int main()
 
     //unisgned integer shader object v shader is the name
     GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
-
     //we must attach the shader 1 means number of strings in the array
     //vshdadersource points to the source code definded above
     //Null means the source string is null at the end ???
     glShaderSource(vShader, 1 , &vShaderSource, NULL);
-
     //compile shader
     glCompileShader(vShader);
 
@@ -87,6 +85,19 @@ int main()
     GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fShader, 1 , &fShaderSource, NULL);
     glCompileShader(fShader);
+
+    //generating a shader program to link everything
+    Gluint shaderApp = glCreateProgram();
+    //attaching vshader and fshader to the app
+    glAttachShader(shaderApp, vShader);
+    glAttachShader(shaderApp, fShader);
+    //linking the program????
+    glLinkProgram(shaderApp);
+    
+    //deleting shaders after we are done with them because they are already linked to the program
+    glDeleteShader(vShader);
+    glDeleteShader(fshader);
+
     
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     //main while loop
