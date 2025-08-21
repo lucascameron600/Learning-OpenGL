@@ -15,7 +15,7 @@ const char* fShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f);\n"
+"   FragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);\n"
 "}\n\0";
 
 //handles excape key
@@ -48,7 +48,7 @@ int main()
     {
         -0.75f, -0.75f,0.0f,
         0.75f, -0.75f,0.0f,
-        0.0f, -0.75f, 0.0f
+        0.0f, 0.75f, 0.0f
 
     };
 
@@ -87,7 +87,7 @@ int main()
     glCompileShader(fShader);
 
     //generating a shader program to link everything
-    Gluint shaderApp = glCreateProgram();
+    GLuint shaderApp = glCreateProgram();
     //attaching vshader and fshader to the app
     glAttachShader(shaderApp, vShader);
     glAttachShader(shaderApp, fShader);
@@ -96,26 +96,65 @@ int main()
     
     //deleting shaders after we are done with them because they are already linked to the program
     glDeleteShader(vShader);
-    glDeleteShader(fshader);
+    glDeleteShader(fShader);
 
+    //need to create a vertex buffer to store all of these things
+    //before we send them to the GPU
+    //Create a Vertex buffer from gluint
+    GLuint VAO, VBO;
+    
+    glGenVertexArrays(1, &VAO);
+    //Gen the buffer and bind it to the adress of the vbo
+    glGenBuffers(1, &VBO);
+    //binding vertex array
+    glBindVertexArray(VAO);
+    //binding buffer
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //actually creating the buffer and telling it how many verticies are in it.
+    // GL_STATIC means that verticies are modified once and used many times
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW);
+    
+    //the VAO stores pointers to the different VBOS and allows you
+    // to switch between different VBOS wihtout lag
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    //enables vertex attrib pointer
+    glEnableVertexAttribArray(0);
+
+    //these two lines unbind the buffer and vao to help protect out buffers and arrays
+    //from being changed
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
     
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     //main while loop
     while(!glfwWindowShouldClose(window))
     {
+        //clear screen and change the color 
         glClearColor(1.0f, 0.6f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
         getInput(window);
+
+        //activate shader program that we built earlier
+        glUseProgram(shaderApp);
+        //bind all of our VBOs inside our VAO tells open gl we are using this VAO
+        glBindVertexArray(VAO);
+        //tells opengl that we are using triangles 0 is the starting 
+        //index of our vertices and that we have 3 of them
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        
+
 
         //render here
         //
         //
         //swap buffers
+        //make sure you swap the buffers, why not quite sure yet.
         glfwSwapBuffers(window);
         glfwPollEvents();    
     }
     
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
 
     glfwTerminate();
     return 0;
